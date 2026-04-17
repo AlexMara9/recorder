@@ -11,7 +11,7 @@ class AsState(IntEnum):
     READY = 2
     DRIVE = 3
     FINISH = 4
-    ERROR = 5
+    EMERGENCY = 5
 
 class TulNode(Node):
     def __init__(self):
