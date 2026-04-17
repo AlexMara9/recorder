@@ -1,0 +1,11 @@
+tul:
+  as_state_topic: /as/state   #Int8
+  modules:
+    - type: bag_recorder
+      name: bag_recorder
+      start_on_state: 3
+      stop_on_state: 4
+    - type: jtop_logger
+      name: jtop_logger
+      start_on_state: 3
+      stop_on_state: 4
