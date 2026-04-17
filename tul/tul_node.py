@@ -17,6 +17,7 @@ class TulNode(Node):
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)['tul']
         self._debug: bool = config['debug']
+        self._start_state: AsState = config['start_state']
         self._auto_shutdown: bool = config.get('auto-shutdown', True)
         self._state_topic: str = config['as_state_topic']
         self._modules_config: list[dict] = config.get('modules', [])
@@ -28,7 +29,7 @@ class TulNode(Node):
         
         # ====== config ======
         self._as_subscriber = self.create_subscription(Int8, self._state_topic, self.state_callback, 1)
-        self._current_state = None
+        self._current_state = self._start_state
 
     def _build_modules(self) -> list[IModule]:
         modules: list[IModule] = []
@@ -37,7 +38,7 @@ class TulNode(Node):
             if cls is None:
                 self.get_logger().warn(f"Unknown module type: {mod_cfg['type']}")
                 continue
-            modules.append(cls(debug=self._debug, config=mod_cfg, logger=self.get_logger(), create_timer=self.create_timer, create_publisher=self.create_publisher))
+            modules.append(cls(debug=self._debug, start_state=self._start_state, config=mod_cfg, logger=self.get_logger(), create_timer=self.create_timer, create_publisher=self.create_publisher))
         return modules
 
     def state_callback(self, msg: Int8) -> None:
@@ -58,8 +59,7 @@ class TulNode(Node):
                 self.get_logger().warn("Received EMERGENCY state. Stopping all modules.")
             
             if self._auto_shutdown:
-                os.kill(os.getpid(), signal.SIGINT)
-            return    
+                os.kill(os.getpid(), signal.SIGINT)    
         
         self._current_state = new_state
         if self._debug:
