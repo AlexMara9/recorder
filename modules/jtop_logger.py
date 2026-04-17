@@ -1,68 +1,55 @@
-from imodule import IModule
-from tul.tul_node import AsState
+from .imodule import IModule, AsState
 from jtop import jtop
-from enum import IntEnum
+import pandas as pd
 
 class JtopLogger(IModule):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, debug: bool, config: dict, logger, create_timer) -> None:
+        super().__init__(debug, config, logger, create_timer)
 
         # ====== config ======
-        self._jtop_timer = self.create_timer(1.0, self.jtop_timer_callback)
+        self._output_path = config['output_path']
+        self._jtop_timer = self._create_timer(1.0, self.jtop_timer_callback)
         self._jtop_timer.cancel()  # Start with timer stopped
-
-        # ====== var ======
         self._current_state = None
         self._jetson = None
+        self._data = []
+    
+    # ====== IModule methods ======
+    def _module_init(self):
+        try:
+            self._jetson = jtop()
+            self._jetson.start()
+            self._logger.info("[jtop_logger]: Successfully connected to Jetson hardware monitor.")
+        except Exception as e:
+            self._logger.error(f"[jtop_logger]: Failed to connect to Jetson hardware monitor: {e}")
 
+    def _module_start(self):
+        self._jtop_timer.reset()    # Start logging
+
+    def _module_stop(self):
+        if self.jtop_timer_callback is not None:
+            self._jtop_timer.cancel()
+        if self._jetson is not None:
+            self._jetson.close()
+        if self._data:
+            self._save_to_csv()
+
+    # ====== internal methods ======
     def jtop_timer_callback(self):
         if self._jetson.ok():
             stats = self._jetson.stats
-            self.get_logger().info(f"Jetson Stats: {stats}")
+            self._data.append(stats)
+            if self._debug:
+                self._logger.info(f"Jetson Stats: {stats}")
         else:
-            self.get_logger().error("Error while fetching Jetson stats")
+            self._logger.error("[jtop_logger]: Error while fetching Jetson stats")
 
-    def next_state(self, state) -> IntEnum:
-        return self._current_state + 1 if self._current_state is not None else AsState.IDLE
-    
-    def next_state_is_correct(self, state) -> bool:
-        return state == self.next_state(state)
+    def _save_to_csv(self):
+        if not self._data:
+            self._logger.warn('No data collected!')
+            return
 
-    def on_state_change(self, state) -> None:
-        match state:
-            case AsState.IDLE:
-                if not self.next_state_is_correct(state): return
-                self._current_state = state
-
-            case AsState.CHECKING:
-                if not self.next_state_is_correct(state): return
-                self._current_state = state
-                try:
-                    self._jetson = jtop()
-                    self._jetson.start()
-                    self.get_logger().info("Successfully connected to Jetson hardware monitor.")
-                except Exception as e:
-                    self.get_logger().error(f"Failed to connect to Jetson hardware monitor: {e}")
-            
-            case AsState.READY:
-                if not self.next_state_is_correct(state): return
-                self._current_state = state
-
-            case AsState.DRIVE:
-                if not self.next_state_is_correct(state): return
-                self._current_state = state
-                self._jtop_timer.start()    # Start logging
-
-            case AsState.FINISH:
-                if not self.next_state_is_correct(state): return
-                self._current_state = state
-
-            case AsState.EMERGENCY:
-                pass
-            case _:
-                pass
-
-    def shutdown(self) -> None:
-        if self._jetson:
-            self._jetson.stop()
-            self._jtop_timer.cancel()
+        df = pd.DataFrame(self._data)
+        df.to_csv(self._output_path, index=False)
+        self._logger.info(f'Saved {len(df)} rows to {self._output_path}')
+        self._logger.info(f'Columns: {list(df.columns)}')

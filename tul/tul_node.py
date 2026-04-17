@@ -1,17 +1,11 @@
-from enum import IntEnum
-from std_msgs.msg import Int8
+import os
+import signal
+import yaml
 from rclpy.node import Node
 import rclpy
-import yaml
-
-
-class AsState(IntEnum):
-    IDLE = 0
-    CHECKING = 1
-    READY = 2
-    DRIVE = 3
-    FINISH = 4
-    EMERGENCY = 5
+from std_msgs.msg import Int8
+from modules.imodule import IModule, AsState
+from modules import REGISTRY
 
 class TulNode(Node):
     def __init__(self):
@@ -22,44 +16,62 @@ class TulNode(Node):
         config_path = self.get_parameter('config_path').get_parameter_value().string_value
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)['tul']
+        self._debug: bool = config['debug']
         self._state_topic: str = config['as_state_topic']
         self._modules_config: list[dict] = config.get('modules', [])
-        self.get_logger().info(f"Loaded config: {config}")
+        self._modules: list[IModule] = self._build_modules()
+        self.get_logger().info(f"Loaded {len(self._modules)} modules")
+        self.get_logger().info(f"Modules: {[module.__class__.__name__ for module in self._modules]}")
+        self.get_logger().info("======================================")
         
         # ====== config ======
         self._as_subscriber = self.create_subscription(Int8, self._state_topic, self.state_callback, 1)
+        self._current_state = None
 
-        # ====== var ======
-        self._current_state = AsState.IDLE
+    def _build_modules(self) -> list[IModule]:
+        modules: list[IModule] = []
+        for mod_cfg in self._modules_config:
+            cls = REGISTRY.get(mod_cfg['type'])
+            if cls is None:
+                self.get_logger().warn(f"Unknown module type: {mod_cfg['type']}")
+                continue
+            modules.append(cls(debug=self._debug, config=mod_cfg, logger=self.get_logger(), create_timer=self.create_timer))
+        return modules
 
     def state_callback(self, msg: Int8) -> None:
         try:
             new_state = AsState(msg.data)
         except ValueError:
-            self.get_logger().warn(f"Unknown state value: {msg.data}")
+            if self._debug:
+                self.get_logger().warn(f"Unknown state value: {msg.data}")
             return
         
         if self._current_state == new_state:
+            if self._debug:
+                self.get_logger().info(f"Received state {new_state} but it's the same as current state. Ignoring.")
+            return
+
+        if new_state == AsState.EMERGENCY:  # there is no need to send a SINGINT for each EMERGENCY call, so this section can stay after the new state check
+            if self._debug:
+                self.get_logger().warn("Received EMERGENCY state. Stopping all modules.")
+            os.kill(os.getpid(), signal.SIGINT)
             return    
         
         self._current_state = new_state
-        self.get_logger().info(f"Received state: {self._current_state}")
+        if self._debug:
+            self.get_logger().info(f"Received state: {self._current_state}")
 
-        for module in self._modules_config:
-            self.get_logger().info(f"Notifying module: {module['name']} of state change to {self._current_state}")
+        for module in self._modules:
             try:
+                self.get_logger().info(f"Notifying module: {module.__class__.__name__} of state change to {self._current_state}")
                 module.on_state_change(self._current_state)
             except Exception as e:
-                # self.get_logger().error(f"Error occurred while notifying module: {module['name']} - {e}")
+                self.get_logger().error(f"Error occurred while notifying module: {module.__class__.__name__} - {e}")
                 pass
 
     def destroy_node(self):
-        for module in self._modules_config:
-            try:
-                module.shutdown()
-            except Exception as e:
-                # self.get_logger().error(f"Error occurred while shutting down module: {module['name']} - {e}")
-                pass
+        for module in self._modules:
+            module._module_stop()
         super().destroy_node()
 
 def main():
@@ -71,7 +83,8 @@ def main():
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == '__main__':

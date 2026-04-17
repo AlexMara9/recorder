@@ -1,11 +1,13 @@
 tul:
-  as_state_topic: /as/state   #Int8
+  debug: false
+  as_state_topic: /as/status   #Int8
   modules:
     - type: bag_recorder
-      name: bag_recorder
+      init_on_state: 3
       start_on_state: 3
       stop_on_state: 4
     - type: jtop_logger
-      name: jtop_logger
+      init_on_state: 3
       start_on_state: 3
       stop_on_state: 4
+      output_path: /data/jtop_log.csv
