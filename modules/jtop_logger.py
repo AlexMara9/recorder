@@ -15,7 +15,7 @@ class JtopLogger(IModule):
         self._data = []
     
     # ====== IModule methods ======
-    def _module_init(self):
+    def _module_init(self) -> None:
         try:
             self._jetson = jtop()
             self._jetson.start()
@@ -23,10 +23,10 @@ class JtopLogger(IModule):
         except Exception as e:
             self._logger.error(f"[jtop_logger]: Failed to connect to Jetson hardware monitor: {e}")
 
-    def _module_start(self):
+    def _module_start(self) -> None:
         self._jtop_timer.reset()    # Start logging
 
-    def _module_stop(self):
+    def _module_stop(self) -> None:
         if self.jtop_timer_callback is not None:
             self._jtop_timer.cancel()
         if self._jetson is not None:
@@ -35,7 +35,7 @@ class JtopLogger(IModule):
             self._save_to_csv()
 
     # ====== internal methods ======
-    def jtop_timer_callback(self):
+    def jtop_timer_callback(self) -> None:
         if self._jetson.ok():
             stats = self._jetson.stats
             self._data.append(stats)
@@ -44,7 +44,7 @@ class JtopLogger(IModule):
         else:
             self._logger.error("[jtop_logger]: Error while fetching Jetson stats")
 
-    def _save_to_csv(self):
+    def _save_to_csv(self) -> None:
         if not self._data:
             self._logger.warn('No data collected!')
             return
@@ -52,4 +52,3 @@ class JtopLogger(IModule):
         df = pd.DataFrame(self._data)
         df.to_csv(self._output_path, index=False)
         self._logger.info(f'Saved {len(df)} rows to {self._output_path}')
-        self._logger.info(f'Columns: {list(df.columns)}')

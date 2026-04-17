@@ -20,6 +20,7 @@ class TulNode(Node):
         self._state_topic: str = config['as_state_topic']
         self._modules_config: list[dict] = config.get('modules', [])
         self._modules: list[IModule] = self._build_modules()
+        self.get_logger().info("============ Configuration ===========")
         self.get_logger().info(f"Loaded {len(self._modules)} modules")
         self.get_logger().info(f"Modules: {[module.__class__.__name__ for module in self._modules]}")
         self.get_logger().info("======================================")
@@ -69,7 +70,7 @@ class TulNode(Node):
                 self.get_logger().error(f"Error occurred while notifying module: {module.__class__.__name__} - {e}")
                 pass
 
-    def destroy_node(self):
+    def destroy_node(self) -> None:
         for module in self._modules:
             module._module_stop()
         super().destroy_node()
