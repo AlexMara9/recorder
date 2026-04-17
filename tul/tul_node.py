@@ -17,6 +17,7 @@ class TulNode(Node):
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)['tul']
         self._debug: bool = config['debug']
+        self._auto_shutdown: bool = config.get('auto-shutdown', True)
         self._state_topic: str = config['as_state_topic']
         self._modules_config: list[dict] = config.get('modules', [])
         self.get_logger().info("============ Configuration ===========")
@@ -36,7 +37,7 @@ class TulNode(Node):
             if cls is None:
                 self.get_logger().warn(f"Unknown module type: {mod_cfg['type']}")
                 continue
-            modules.append(cls(debug=self._debug, config=mod_cfg, logger=self.get_logger(), create_timer=self.create_timer))
+            modules.append(cls(debug=self._debug, config=mod_cfg, logger=self.get_logger(), create_timer=self.create_timer, create_publisher=self.create_publisher))
         return modules
 
     def state_callback(self, msg: Int8) -> None:
@@ -55,7 +56,9 @@ class TulNode(Node):
         if new_state == AsState.EMERGENCY:  # there is no need to send a SINGINT for each EMERGENCY call, so this section can stay after the new state check
             if self._debug:
                 self.get_logger().warn("Received EMERGENCY state. Stopping all modules.")
-            os.kill(os.getpid(), signal.SIGINT)
+            
+            if self._auto_shutdown:
+                os.kill(os.getpid(), signal.SIGINT)
             return    
         
         self._current_state = new_state
