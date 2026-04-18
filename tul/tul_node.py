@@ -72,7 +72,11 @@ class TulNode(Node):
 
     def destroy_node(self) -> None:
         for module in self._modules:
-            module._module_stop()
+            try:
+                module._module_stop()
+            except Exception as e:
+                self.get_logger().error(f'Error stopping module {module}: {e}')
+
         super().destroy_node()
 
 def main():
