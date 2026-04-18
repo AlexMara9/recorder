@@ -19,8 +19,8 @@ class TulNode(Node):
         self._debug: bool = config['debug']
         self._state_topic: str = config['as_state_topic']
         self._modules_config: list[dict] = config.get('modules', [])
-        self._modules: list[IModule] = self._build_modules()
         self.get_logger().info("============ Configuration ===========")
+        self._modules: list[IModule] = self._build_modules()
         self.get_logger().info(f"Loaded {len(self._modules)} modules")
         self.get_logger().info(f"Modules: {[module.__class__.__name__ for module in self._modules]}")
         self.get_logger().info("======================================")
