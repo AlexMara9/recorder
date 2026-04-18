@@ -46,9 +46,11 @@ class JtopLogger(IModule):
 
     def _save_to_csv(self) -> None:
         if not self._data:
-            self._logger.warn('No data collected!')
+            if self._debug:
+                self._logger.warn('No data collected!')
             return
 
         df = pd.DataFrame(self._data)
         df.to_csv(self._output_path, index=False)
-        self._logger.info(f'Saved {len(df)} rows to {self._output_path}')
+        if self._debug:
+            self._logger.info(f'Saved {len(df)} rows to {self._output_path}')
