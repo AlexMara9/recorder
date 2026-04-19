@@ -7,6 +7,11 @@ ros2 ros2 launch tul tul.launch.py
 
 ## Build
 ```bash
+mkdir -p ros2_ws/src
+cd ros2_ws/src
+
+git clone https://github.com/leonardonels/tul.git --recurse-submodules
+
 colcon build --symlink-install --packages-select tul
 source install/setup.bash
 ```
@@ -85,7 +90,5 @@ if [[ ":$PYTHONPATH:" != *":/home/orin/.local/share/jtop/lib/python3.12/site-pac
 fi
 ```
 
-# TODO
-- [ ] rosbag module
-- [ ] pcap module
-- [ ] shutdown module
+# TODO:
+- [ ] allow the eventual orchestrator to kill this node to - no selftdestruction
