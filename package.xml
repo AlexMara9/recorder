@@ -6,8 +6,9 @@
   <description>TODO: Package description</description>
   <maintainer email="leo.nels.2000@gmail.com">orin</maintainer>
   <license>Apache-2.0</license>
-
-  <depend>std_msg</depend>
+  
+  <depend>rosbag2_py</depend>
+  <depend>std_msgs</depend>
   <depend>rclcpp</depend>
 
   <test_depend>ament_copyright</test_depend>
