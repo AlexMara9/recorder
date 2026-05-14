@@ -38,7 +38,7 @@ class TulNode(Node):
             if cls is None:
                 self.get_logger().warn(f"Unknown module type: {mod_cfg['type']}")
                 continue
-            modules.append(cls(debug=self._debug, start_state=self._start_state, config=mod_cfg, logger=self.get_logger(), create_timer=self.create_timer, create_publisher=self.create_publisher))
+            modules.append(cls(recorder_node=self,debug=self._debug, start_state=self._start_state, config=mod_cfg, logger=self.get_logger(), create_timer=self.create_timer, create_publisher=self.create_publisher))
         return modules
 
     def state_callback(self, msg: Int8) -> None:
