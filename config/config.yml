@@ -1,6 +1,6 @@
 tul:
   debug: false
-  start_state: 1
+  start_state: 0
   auto-shutdown: false   # set to false to allow the as_drive orchestrator to control the shutdown of the node
   as_state_topic: /as/status   #Int8
   modules:
