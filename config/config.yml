@@ -1,16 +1,16 @@
 tul:
   debug: false
-  start_state: 2
+  start_state: 3
   auto-shutdown: false   # set to false to allow the as_drive orchestrator to control the shutdown of the node
   as_state_topic: /as/status   #Int8
   modules:
-    - type: jtop_logger
-      init_on_state: 2
-      start_on_state: 3
-      stop_on_state: 4
-      output_path: /home/orin/jtop_log.csv
-      publish_stats: false
-      out_topic_prefix: tul
+#    - type: jtop_logger
+#      init_on_state: 2
+#      start_on_state: 3
+#      stop_on_state: 4
+#      output_path: /home/orin/jtop_log.csv
+#      publish_stats: false
+#      out_topic_prefix: tul
     - type: hesai_temp
       init_on_state: 2
       start_on_state: 3
