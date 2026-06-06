@@ -8,6 +8,10 @@ tul:
       init_on_state: 1
       start_on_state: 3
       stop_on_state: 4
+    - type: pcap_recorder
+      init_on_state: 1
+      start_on_state: 3
+      stop_on_state: 4
     - type: jtop_logger
       init_on_state: 1
       start_on_state: 3
