@@ -1,22 +1,19 @@
 tul:
   debug: false
-  start_state: 1
+  start_state: 2
   auto-shutdown: false   # set to false to allow the as_drive orchestrator to control the shutdown of the node
   as_state_topic: /as/status   #Int8
   modules:
-    - type: bag_recorder
-      init_on_state: 1
-      start_on_state: 3
-      stop_on_state: 4
     - type: jtop_logger
-      init_on_state: 1
+      init_on_state: 2
       start_on_state: 3
       stop_on_state: 4
       output_path: /home/orin/jtop_log.csv
-      publish_stats: true
-      cpu_avg_topic: ["tul/cpu_avg_stats"]
-      gpu_topic: ["tul/gpu_stats"]
-      ram_topic: ["tul/ram_stats"]
-      power_topic: ["tul/power_stats"]
-      temp_topic: ["tul/temp_stats"]
-      jetson_clocks_topic: ["tul/jetson_clocks_stats"]
+      publish_stats: false
+      out_topic_prefix: tul
+    - type: hesai_temp
+      init_on_state: 2
+      start_on_state: 3
+      stop_on_state: 4
+      output_path: /home/leo/hesai_temp_log.csv
+      lidar_temp_topic: /lidar_temp
