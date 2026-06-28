@@ -109,10 +109,13 @@ sudo chmod 750 /usr/bin/tcpdump-recorder
 
 # set capabilities
 sudo setcap cap_net_raw=eip /usr/bin/tcpdump-recorder
-# **OR** use
+```
+```bash
+# OR use
 sudo setcap cap_net_raw,cap_net_admin=eip /usr/bin/tcpdump-recorder
 # if you want to also capture packet not addressed to the netwok adapter
-
+```
+```bash
 # to update the shell without restarting it use
 newgrp pcap
 ```
