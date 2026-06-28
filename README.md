@@ -90,5 +90,32 @@ if [[ ":$PYTHONPATH:" != *":/home/orin/.local/share/jtop/lib/python3.12/site-pac
 fi
 ```
 
+## pcap_recorder module - requirements
+```bash
+# update and install tcpdump
+sudo apt update
+sudo apt install tcpdump -y
+
+# make a copy of the executable
+sudo cp /usr/bin/tcpdump /usr/bin/tcpdump-recorder
+
+# create a new group and add the USER
+sudo groupadd pcap
+sudo usermod -aG pcap USER
+
+# give permissions
+sudo chgrp pcap /usr/bin/tcpdump-recorder
+sudo chmod 750 /usr/bin/tcpdump-recorder
+
+# set capabilities
+sudo setcap cap_net_raw=eip /usr/bin/tcpdump-recorder
+# **OR** use
+sudo setcap cap_net_raw,cap_net_admin=eip /usr/bin/tcpdump-recorder
+# if you want to also capture packet not addressed to the netwok adapter
+
+# to update the shell without restarting it use
+newgrp pcap
+```
+
 # TODO:
 - [ ] allow the eventual orchestrator to kill this node to - no selftdestruction
