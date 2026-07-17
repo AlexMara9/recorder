@@ -12,7 +12,6 @@ tul:
       bag_name: rosbag  # name_TIMESTAMP
       date_format: "%Y_%m_%d-%H_%M_%S"
       enable_ids: true
-      use_qos_profiles: 
       qos_profile_path: # absolute
       bag_args:
       # fast limo only topics
