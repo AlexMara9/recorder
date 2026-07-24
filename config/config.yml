@@ -1,6 +1,6 @@
 tul:
-  debug: false
-  start_state: 3
+  debug: true
+  start_state: 2
   auto-shutdown: false   # set to false to allow the as_drive orchestrator to control the shutdown of the node
   as_state_topic: /as/status   #Int8
   modules:
@@ -11,9 +11,40 @@ tul:
 #      output_path: /home/orin/jtop_log.csv
 #      publish_stats: false
 #      out_topic_prefix: tul
-    - type: hesai_temp
+#    - type: hesai_temp
+#      init_on_state: 2
+#      start_on_state: 3
+#      stop_on_state: 4
+#      output_path: /home/leo/hesai_temp_log.csv
+#      lidar_temp_topic: /lidar_temp
+    #- type: bag_recorder
+    #  init_on_state: 2
+    #  start_on_state: 3
+    #  stop_on_state: 4
+    #  bag_dir: ./recordings/bag/ # absolute path
+    #  bag_name: rosbag  # name_TIMESTAMP
+    #  date_format: "%Y_%m_%d-%H_%M_%S"
+    #  enable_ids: true
+    #  qos_profile_path: # absolute
+    #  bag_args:
+    #  # fast limo only topics
+    #  #topics: /tf /tf_static /fast_limo/body /fast_limo/deskewed /fast_limo/final_raw /fast_limo/match /fast_limo/match_points /fast_limo/original /fast_limo/pointcloud /fast_limo/state
+    #  # full_stack_no_pcap    # xsens             # lidar                 # perception # fast_limo    # ekf                           # local_planner                                                                                                                                           # as_drive
+    #  #topics: /tf /tf_static /imu/data /odometry /lidar_imu /lidar_points /clusters /fast_limo/state /Odometry /slam/cones_positions /planning/center_line /planning/visualization_triangulation /planning/center_line_completed /planning/race_status /planning/brake_line /planning/end_line /as/status /mission/selected
+    #  # full_stack_orin_only
+    #  #topics: /tf /tf_static /imu/data /odometry /lidar_imu /lidar_points /clusters /fast_limo/state /Odometry /slam/cones_positions /planning/center_line /planning/visualization_triangulation /planning/center_line_completed /planning/race_status /planning/brake_line /planning/end_line
+    #  # full_stack            # xsens             # lidar                 # perception # fast_limo    # ekf                           # local_planner                                                                                                                                           # as_drive
+    #  #topics: /tf /tf_static /imu/data /odometry /lidar_imu /lidar_points /clusters /fast_limo/state /Odometry /slam/cones_positions /planning/center_line /planning/visualization_triangulation /planning/center_line_completed /planning/race_status /planning/brake_line /planning/end_line /as/status /mission/selected
+    #  # perception
+    #  #topics: /tf /tf_static /lidar_points /clusters /filtered_points /segmented_points
+    #  # test
+    #  topics: /imu/data /lidar_imu /as/status
+    - type: pcap_recorder
       init_on_state: 2
       start_on_state: 3
       stop_on_state: 4
-      output_path: /home/leo/hesai_temp_log.csv
-      lidar_temp_topic: /lidar_temp
+      pcap_dir: /home/orin/logs/july-2026/pcap # absolute path please
+      pcap_name: tcpdump.pcap  # name_TIMESTAMP
+      date_format: "%Y_%m_%d-%H_%M_%S"
+      enable_ids: true
+      pcap_args: -i enxc8a362b92514 -s 0 udp and port 2368
