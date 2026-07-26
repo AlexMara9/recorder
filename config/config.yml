@@ -5,14 +5,14 @@ tul:
   as_state_topic: /as/status   # Int8
   modules:
     - type: bag_recorder
-      init_on_state: 1
+      init_on_state: 2
       start_on_state: 3
       stop_on_state: 4
-      bag_dir: ./recordings/bag/ # absolute path
+      bag_dir: /home/orin/logs/july-2026/bags/ # absolute path
       bag_name: rosbag  # name_TIMESTAMP
       date_format: "%Y_%m_%d-%H_%M_%S"
       enable_ids: true
-      qos_profile_path: # absolute
+      qos_profile_path:         # absolute
       bag_args:
       # fast limo only topics
       #topics: /tf /tf_static /fast_limo/body /fast_limo/deskewed /fast_limo/final_raw /fast_limo/match /fast_limo/match_points /fast_limo/original /fast_limo/pointcloud /fast_limo/state
@@ -25,25 +25,13 @@ tul:
       # perception
       #topics: /tf /tf_static /lidar_points /clusters /filtered_points /segmented_points
       # test
-      topics: /imu/data /lidar_imu /as/status
+      topics: /as/status
     - type: pcap_recorder
-      init_on_state: 1
+      init_on_state: 2
       start_on_state: 3
       stop_on_state: 4
-      pcap_dir: ./recordings/pcap/ # absolute path
+      pcap_dir: /home/orin/logs/july-2026/pcap/ # absolute path please
       pcap_name: tcpdump.pcap  # name_TIMESTAMP
       date_format: "%Y_%m_%d-%H_%M_%S"
       enable_ids: true
-      pcap_args: -i eth0 -s 0 udp and port 2368
-    - type: jtop_logger
-      init_on_state: 1
-      start_on_state: 3
-      stop_on_state: 4
-      output_path: /home/orin/jtop_log.csv
-      publish_stats: true
-      cpu_avg_topic: ["tul/cpu_avg_stats"]
-      gpu_topic: ["tul/gpu_stats"]
-      ram_topic: ["tul/ram_stats"]
-      power_topic: ["tul/power_stats"]
-      temp_topic: ["tul/temp_stats"]
-      jetson_clocks_topic: ["tul/jetson_clocks_stats"]
+      pcap_args: -i enxc8a362b92514 -s 0 udp and port 2368
