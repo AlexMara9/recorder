@@ -90,5 +90,38 @@ if [[ ":$PYTHONPATH:" != *":/home/orin/.local/share/jtop/lib/python3.12/site-pac
 fi
 ```
 
+## pcap_recorder module - requirements
+```bash
+# update and install tcpdump if not already installed
+sudo apt update
+sudo apt install tcpdump -y
+```
+The `tcpdump` command requries sudo privileges, the following is a simple usergroup workaround. By using a copy of the executable, the user wont have sudo privileges granted on standard `tcpdump` operations.
+```bash
+# make a copy of the executable  
+sudo cp /usr/bin/tcpdump /usr/bin/tcpdump-tul
+
+# create a new group and add the user
+sudo groupadd pcap
+sudo usermod -aG pcap $USER
+
+# give permissions
+sudo chgrp pcap /usr/bin/tcpdump-tul
+sudo chmod 750 /usr/bin/tcpdump-tul
+
+# set capabilities
+sudo setcap cap_net_raw=eip /usr/bin/tcpdump-tul
+```
+```bash
+# OR use
+sudo setcap cap_net_raw,cap_net_admin=eip /usr/bin/tcpdump-tul
+# if you want to also capture packet not addressed to the netwok adapter
+```
+```bash
+# next to update the shell without restarting it use
+newgrp pcap
+```
+
 # TODO:
-- [ ] allow the eventual orchestrator to kill this node to - no selftdestruction
+- [x] allow the eventual orchestrator to kill this node too - no selftdestruction
+- [x] allow jumpstarts to skip eerly FSM steps
